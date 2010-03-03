@@ -1,0 +1,13 @@
+usePlugin 'java'  
+usePlugin 'eclipse'
+  
+repositories {  
+  mavenCentral()  
+}
+  
+dependencies {  
+}  
+  
+group = 'org.dyto'  
+version = '0.1'  
+sourceCompatibility=1.6 
