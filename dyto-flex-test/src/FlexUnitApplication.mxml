@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/halo" minWidth="1024" minHeight="768" xmlns:flexunit="flexunit.flexui.*"    creationComplete="onCreationComplete()" >	
+<fx:Script>
+	<![CDATA[
+		import mx.logging.LogEventLevel;
+		
+		import org.dyto.test.dyto.DyTOsTest;
+		import org.flexunit.runner.Request;
+
+		public function currentRunTestSuite():Array
+		{
+			var testsToRun:Array = new Array();
+			testsToRun.push(Request.method( org.dyto.test.dyto.DyTOsTest,"testIfCreateNewWorksOk"));
+			testsToRun.push(Request.method( org.dyto.test.dyto.DyTOsTest,"testIfCommandLogsWorksOk"));
+			return testsToRun;
+		}
+		private function onCreationComplete():void
+		{
+			testRunner.runWithFlexUnit4Runner(currentRunTestSuite(), "dyto-flex-test");
+		}
+]]>
+</fx:Script>
+
+	<fx:Declarations>
+		<s:TraceTarget 
+			level="{LogEventLevel.DEBUG}" 
+			includeDate="true" includeTime="true" 
+			includeCategory="true" includeLevel="true">
+			<s:filters>
+				<fx:Array>
+					<fx:String>org.*</fx:String>
+				</fx:Array>
+			</s:filters>
+		</s:TraceTarget>
+	</fx:Declarations>
+	
+<flexunit:FlexUnitTestRunnerUI id="testRunner"/>
+</s:Application>

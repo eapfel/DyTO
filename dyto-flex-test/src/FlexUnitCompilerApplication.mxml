@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/halo" minWidth="1024" minHeight="768">	
+<fx:Script>
+	<![CDATA[
+
+			import org.dyto.test.dyto.DyTOsTest;
+
+			private var org_dyto_test_dyto_DyTOsTest_obj:org.dyto.test.dyto.DyTOsTest;
+	]]>
+</fx:Script>	
+<fx:Script>
+	<![CDATA[
+		import mx.logging.LogEventLevel;
+		
+		import org.dyto.test.DyTOTestSuit2;
+
+			private var flexUnitTests_DyTOTestSuit2_obj:org.dyto.test.DyTOTestSuit2;
+	]]>
+</fx:Script>
+	<fx:Declarations>
+		<s:TraceTarget 
+			level="{LogEventLevel.DEBUG}" 
+			includeDate="true" includeTime="true" 
+			includeCategory="true" includeLevel="true">
+			<s:filters>
+				<fx:Array>
+					<fx:String>org.*</fx:String>
+				</fx:Array>
+			</s:filters>
+		</s:TraceTarget>
+	</fx:Declarations>
+	
+</s:Application>

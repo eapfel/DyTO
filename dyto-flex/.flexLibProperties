@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <flexLibProperties includeAllClasses="true" version="3">
   <includeClasses>
-    <classEntry path="org.dyto.dtos.DescriptionDto"/>
+    <classEntry path="org.dyto.description.DescriptionDto"/>
+    <classEntry path="org.dyto.description.factory.DescriptionFactory"/>
+    <classEntry path="org.dyto.description.factory.impl.DescriptionFactoryImpl"/>
+    <classEntry path="org.dyto.description.PropertyDescriptionDto"/>
+    <classEntry path="org.dyto.description.DyTOPropertyDescriptionDto"/>
+    <classEntry path="org.dyto.description.DyTOListPropertyDescriptionDto"/>
+    <classEntry path="org.dyto.metadata.DyTOPropertyMetadata"/>
+    <classEntry path="org.dyto.exception.DyTOMappingError"/>
+    <classEntry path="org.dyto.metadata.DyTOMetadata"/>
+    <classEntry path="org.dyto.metadata.MetadataUtils"/>
+    <classEntry path="org.dyto.reference.ReferenceDto"/>
+    <classEntry path="org.dyto.reference.QueryDto"/>
+    <classEntry path="org.dyto.dls.DyTOLifeSupportBase"/>
+    <classEntry path="org.dyto.dls.DyTOLifeSupport"/>
+    <classEntry path="org.dyto.DyTOs"/>
+    <classEntry path="org.dyto.exception.DyTOError"/>
+    <classEntry path="org.dyto.service.DyTOServiceImpl"/>
+    <classEntry path="org.dyto.uow.UnitOfWork"/>
+    <classEntry path="org.dyto.listener.PropertyListener"/>
+    <classEntry path="org.dyto.list.DyTOList"/>
+    <classEntry path="org.dyto.reference.ResultConfigDto"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/halo"
+							 minWidth="1024" minHeight="768"
+							 creationComplete="doInit()" 
+							 xmlns:adobe="http://www.adobe.com/2009/flexUnitUIRunner">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.logging.LogEventLevel;
+			
+			import org.dyto.test.DyTOTestSuite;
+			import org.flexunit.runner.FlexUnitCore;
+			
+			private function doInit():void
+			{
+				var core:FlexUnitCore = new FlexUnitCore();
+				
+				//core.addListener(testRunner);
+				
+				core.run(DyTOTestSuite);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<s:TraceTarget 
+			level="{LogEventLevel.DEBUG}" 
+			includeDate="true" includeTime="true" 
+			includeCategory="true" includeLevel="true">
+			<s:filters>
+				<fx:Array>
+					<fx:String>org.*</fx:String>
+				</fx:Array>
+			</s:filters>
+		</s:TraceTarget>
+		
+	</fx:Declarations>
+	
+	<!--adobe:TestRunnerBase id="testRunner" width="100%" height="100%" /-->
+	
+</s:Application>
