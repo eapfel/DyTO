@@ -14,18 +14,43 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////
 
-package org.dyto.dtos
+package org.dyto.dls
 {
+	import org.dyto.description.DescriptionDto;
+	import org.dyto.reference.QueryDto;
 	
 	/**
 	 * @author Ezequiel
-	 * @date Mar 3, 2010
-	 * @since 	
+	 * @date Mar 14, 2010
+	 * @since 0.1	
 	 */
-	public class DescriptionDto
+	public class DyTOLifeSupportBase
 	{
-		public function DescriptionDto()
+		/**
+		 * Description 
+		 */		
+		public var description:DescriptionDto;
+		
+		/**
+		 * Dyto 
+		 */		
+		public var dyto:Object;
+		
+		/**
+		 * Query 
+		 */		
+		public var query:QueryDto
+		
+		/**
+		 * @constructor 
+		 * @param _description
+		 * @param _query
+		 */		
+		public function DyTOLifeSupportBase(_description:DescriptionDto, _query:QueryDto)
 		{
+			description = _description;
+			query = _query;
 		}
+		
 	}
 }
