@@ -19,7 +19,7 @@
 				
 				//core.addListener(testRunner);
 				
-				core.run(DyTOTestSuite);
+				//core.run(DyTOTestSuite);
 			}
 		]]>
 	</fx:Script>
