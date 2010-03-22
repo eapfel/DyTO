@@ -18,12 +18,20 @@ package org.dyto.test.dyto
 {
 	import flexunit.framework.Assert;
 	
+	import mx.collections.ArrayCollection;
 	import mx.logging.ILogger;
 	import mx.logging.Log;
 	
-	import org.dyto.service.DyTOServiceImpl;
+	import org.dyto.DyTOs;
+	import org.dyto.description.factory.impl.DyTOFactory;
+	import org.dyto.test.vo.AtoB;
+	import org.dyto.test.vo.BtoC;
+	import org.dyto.test.vo.CircularDestinationDyTO;
+	import org.dyto.test.vo.CircularSourceDyTO;
 	import org.dyto.test.vo.CompositeDyTO;
+	import org.dyto.test.vo.CtoA;
 	import org.dyto.test.vo.GeneralizationSimpleDyTO;
+	import org.dyto.test.vo.SimpleDyTO;
 	
 	/**
 	 * @author Ezequiel
@@ -44,10 +52,10 @@ package org.dyto.test.dyto
 		[Test(order=1)]
 		public function testIfCreateNewWorksOk():void 
 		{
+			LOG.debug("=============================================");
 			LOG.debug("testIfCreateNewWorksOk");
 			
-			var compositeDyTO:CompositeDyTO = DyTOServiceImpl.createNew(CompositeDyTO) as CompositeDyTO;
-			var compositeDyTO2:CompositeDyTO = DyTOServiceImpl.createNew(CompositeDyTO) as CompositeDyTO;
+			var compositeDyTO:CompositeDyTO = DyTOFactory.createNew(CompositeDyTO) as CompositeDyTO;
 			
 			Assert.assertTrue("Error creating a new dyto", compositeDyTO is CompositeDyTO);
 		}
@@ -55,20 +63,71 @@ package org.dyto.test.dyto
 		[Test(order=2)]
 		public function testIfCommandLogsWorksOk():void 
 		{
+			LOG.debug("=============================================");
 			LOG.debug("testIfCommandLogsWorksOk");
 			
-			var compositeDyTO:CompositeDyTO = DyTOServiceImpl.createNew(CompositeDyTO) as CompositeDyTO;
-			var compositeDyTO2:CompositeDyTO = DyTOServiceImpl.createNew(CompositeDyTO) as CompositeDyTO;
+			/*
+			* Espero un comando por cada dyto que se crea en inistatiateChilder dentro de DyTOLifeSopport
+			* y un comando por cada property que se cambia
+			* CopompositeDyTO tiene 4 comandos
+			*/
+			var compositeDyTO:CompositeDyTO = DyTOFactory.createNew(CompositeDyTO) as CompositeDyTO;
 			
+			//Command 1
 			compositeDyTO.simpleProperty = "hello";
 			
+			//Command 2
+			compositeDyTO.simpleDyTO = DyTOFactory.createNew(SimpleDyTO) as SimpleDyTO;
+			//Command 3
 			compositeDyTO.simpleDyTO.address = "newAddress";
 			
-			compositeDyTO2.simpleProperty = "bye"
-				
-			compositeDyTO2.simpleDyTO.address = "newAddress2";	
+			//Command 4
+			compositeDyTO.circularDyto = DyTOFactory.createNew(CircularSourceDyTO) as CircularSourceDyTO;
+			//Command 5
+			compositeDyTO.circularDyto.aProperty = "aPropertyChange";
 			
-			Assert.assertTrue("Error commandlog", 1==1);
+			//Command 6
+			compositeDyTO.circularDyto.circularDestination = DyTOFactory.createNew(CircularDestinationDyTO) as CircularDestinationDyTO;
+			//Command 7
+			compositeDyTO.circularDyto.circularDestination.aProperty = "aPropertyChange";
+			
+			//Command 8
+			compositeDyTO.circularDyto.circularDestination.circularSource = compositeDyTO.circularDyto;
+			//replace command 5
+			compositeDyTO.circularDyto.circularDestination.circularSource.aProperty = "aPropertyChangeAgain";
+			
+			//Command 9 create AddCommand
+			compositeDyTO.aDytoList.addItem(DyTOFactory.createNew(GeneralizationSimpleDyTO));
+			
+			//Command 10 create AddCommand
+			compositeDyTO.aDytoList.addItem(DyTOFactory.createNew(GeneralizationSimpleDyTO));
+			
+			//Command 11 create RemoveCommand
+			compositeDyTO.aDytoList.removeItemAt(1);
+			
+			var commandLog:ArrayCollection = DyTOs.getSupportFor(compositeDyTO).consolidateCommandLogs();
+			
+			Assert.assertTrue("Error commandlog expected 11, obteins "+commandLog.length , 11==commandLog.length);
+		}
+		
+		[Test(order=3)]
+		public function testIfCommandLogs3CircularWorksOk():void 
+		{
+			LOG.debug("=============================================");
+			LOG.debug("testIfCommandLogs3CircularWorksOk");
+			
+			var atob:AtoB = DyTOFactory.createNew(AtoB) as AtoB;
+			
+			atob.btoc = DyTOFactory.createNew(BtoC) as BtoC;
+			
+			atob.btoc.ctoa = DyTOFactory.createNew(CtoA) as CtoA;
+			
+			atob.btoc.ctoa.atob = atob;
+			
+			var commandLog:ArrayCollection = DyTOs.getSupportFor(atob).consolidateCommandLogs();
+			
+			Assert.assertTrue("Error commandlog expected 3, obteins "+commandLog.length , 3==commandLog.length);
+			
 		}
 	}
 }

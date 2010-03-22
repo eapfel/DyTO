@@ -16,6 +16,8 @@
 
 package org.dyto.uow
 {
+	import mx.logging.ILogger;
+	import mx.logging.Log;
 	
 	/**
 	 * @author Ezequiel
@@ -24,8 +26,57 @@ package org.dyto.uow
 	 */
 	public class UnitOfWork
 	{
-		public function UnitOfWork()
+		static private const LOG:ILogger = Log.getLogger("org.dyto.uow.UnitOfWork");
+		
+		/**
+		 * Logs per property
+		 */		
+		private var commandLog:Object = {};
+		
+		/**
+		 * Logs per dytolist 
+		 */		
+		private var commandLogCollection:Array = [];
+		
+		/**
+		 * Add command into control log 
+		 * @param commandDto
+		 * 
+		 */		
+		public function add(commandDto:UpdateCommand):void
 		{
+			LOG.debug("add command -> "+commandDto);
+			
+			if (commandDto.path)
+				commandLog[commandDto.path] = commandDto;
+			else
+				commandLogCollection.push(commandDto);
+			
+		}
+		
+		public function getCommandLog():Array
+		{
+			return logToArray();
+		}
+		
+		
+		/**
+		 * transforms commandLog into an array 
+		 * @return an Array of commands 
+		 * 
+		 */		
+		private function logToArray():Array
+		{
+			var arrayLog:Array = [];
+			
+			for (var property:String in commandLog)
+			{
+				arrayLog.push(commandLog[property]);	
+			}
+			
+			arrayLog = arrayLog.concat(commandLogCollection);
+			
+			return arrayLog;
 		}
 	}
 }

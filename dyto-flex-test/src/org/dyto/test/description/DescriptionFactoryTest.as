@@ -119,7 +119,7 @@ package org.dyto.test.description
 			// Add your test logic here
 			Assert.assertTrue("Incorrect lazy, expected true but obteins "+propertyDescription.lazy ,propertyDescription.lazy == true);
 			Assert.assertTrue("Incorrect path, expected simple.path but obteins "+propertyDescription.path ,propertyDescription.path == "simple.path");
-			Assert.assertTrue("Incorrect properties number, expected 5 but the object contains "+description.properties.length ,description.properties.length == 5);
+			Assert.assertTrue("Incorrect properties number, expected 6 but the object contains "+description.properties.length ,description.properties.length == 6);
 			Assert.assertTrue("Incorrect properties number, expected 5 but the object contains "+descriptionSimpleDyTO.properties.length ,descriptionSimpleDyTO.properties.length == 5);
 		}
 		

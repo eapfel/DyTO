@@ -22,6 +22,8 @@ package org.dyto.description
 	import org.dyto.dls.DyTOLifeSupport;
 	import org.dyto.exception.DyTOError;
 	import org.dyto.listener.PropertyListener;
+	import org.dyto.reference.QueryDto;
+	import org.dyto.uow.UpdateCommand;
 
 	/**
 	 * @author Ezequiel
@@ -50,7 +52,7 @@ package org.dyto.description
 		/**
 		 * Creates new Dyto 
 		 */
-		public function createNew():Object
+		public function createNew(from:Object):Object
 		{
 			throw new DyTOError("must be override");
 		}
@@ -70,5 +72,30 @@ package org.dyto.description
 		{
 			return false;
 		}
+		
+		/**
+		 * Create new updateCommand
+		 * @param query
+		 * @param oldValue
+		 * @param newValue
+		 * @return 
+		 * 
+		 */		
+		public function createUpdateCommand(query:QueryDto, oldValue:Object, newValue:Object):UpdateCommand
+		{
+			var cmd: UpdateCommand = innerCreateUpdateCommand()
+			
+			cmd.rootReference = query;
+			cmd.path = path;
+			cmd.value = newValue;
+			
+			return cmd;
+		}
+		
+		protected function innerCreateUpdateCommand():UpdateCommand
+		{
+			return new UpdateCommand();
+		}
+		
 	}
 }

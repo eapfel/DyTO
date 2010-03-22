@@ -24,6 +24,7 @@ package org.dyto.dls
 	import org.dyto.DyTOs;
 	import org.dyto.description.DescriptionDto;
 	import org.dyto.description.DyTOListPropertyDescriptionDto;
+	import org.dyto.description.DyTOPropertyDescriptionDto;
 	import org.dyto.description.PropertyDescriptionDto;
 	import org.dyto.list.DyTOList;
 	import org.dyto.listener.PropertyListener;
@@ -41,7 +42,7 @@ package org.dyto.dls
 		 * @private
 		 * Log 
 		 */		
-		static private const LOG:ILogger = Log.getLogger("org.dyto.dls");
+		static private const LOG:ILogger = Log.getLogger("org.dyto.dls.DyTOLifeSupport");
 		
 		/**
 		 * Dictionary of PropertyListener 
@@ -80,12 +81,13 @@ package org.dyto.dls
 		 * @param reference
 		 * @return a new DLS
 		 */		
-		static public function createTransientDyTO(description:DescriptionDto, reference:ReferenceDto):Object
+		static public function createTransientDyTO(description:DescriptionDto, reference:ReferenceDto, from:Object):Object
 		{
 			LOG.debug("Creates a transient dyto for -> "+description.dytoType);
 			
 			var dls:DyTOLifeSupport = createDLS(description, reference);
-			dls.instantiateChildren();
+			
+			dls.instantiateChildren(from);
 			
 			return dls.dyto;
 		}
@@ -97,7 +99,7 @@ package org.dyto.dls
 		//
 		//--------------------------------------------------------------
 		/**
-		 * Create s a new DLS
+		 * Creates a new DLS
 		 * @param description
 		 * @param reference
 		 * @return a new DLS
@@ -110,7 +112,8 @@ package org.dyto.dls
 			if(dyto.hasOwnProperty("id"))
 				dyto.id = reference.id;
 			
-			var dls: DyTOLifeSupport = new DyTOLifeSupport(description, QueryDto.createQueryReference(reference), dyto); 
+			var dls: DyTOLifeSupport = new DyTOLifeSupport(description, QueryDto.createReference(reference), dyto);
+			
 			return dls;  
 		}
 		
@@ -120,6 +123,7 @@ package org.dyto.dls
 		//
 		//--------------------------------------------------------------
 		/**
+		 * Tracks change into control log
 		 * Register properties changes 
 		 * @param propertyName 
 		 * @param oldValue
@@ -130,7 +134,9 @@ package org.dyto.dls
 		{
 			if (!ignoreUpdates)
 			{
-				LOG.debug("DyTO -> "+dyto+" property -> "+propertyName+" changes from -> "+oldValue+" to -> "+newValue);
+				LOG.debug("propertyChange -> "+dyto+" property -> "+propertyName+" change from -> "+oldValue+" to -> "+newValue);
+				
+				log(description.createUpdateCommand(query, propertyName, oldValue, newValue));
 			}
 		}
 		
@@ -139,11 +145,20 @@ package org.dyto.dls
 		// Private Methods
 		//
 		//--------------------------------------------------------------
+		
+		/**
+		 * Binds any dyto property 
+		 * 
+		 */		
 		private function bindProperties():void
 		{
 			propertyListeners = description.bindProperties(this, dyto);
 		}
 		
+		/**
+		 * unbinds properties 
+		 * 
+		 */		
 		private function unbindPropertis(): void
 		{
 			var propertyListener:PropertyListener;
@@ -157,18 +172,14 @@ package org.dyto.dls
 			}
 		}
 		
-		
-		//--------------------------------------------------------------
-		//
-		// Internal Methods
-		//
-		//--------------------------------------------------------------
 		/**
-		 * Creates DyTOs of parent dyto 
+		 * Creates and instantiates DyTOs of the parent dyto 
 		 * 
 		 */		
-		internal function instantiateChildren():void
+		private function instantiateChildren(from:Object):void
 		{
+			LOG.debug("Init InstantiateChildren for -> "+ dyto);
+			
 			var properties:Object = description.properties;
 			
 			var propertyDescriptionDto:PropertyDescriptionDto;
@@ -177,32 +188,58 @@ package org.dyto.dls
 			{
 				propertyDescriptionDto = properties[propertyName];
 				
+				//Esto no va mas, el usuario se tiene que encargar de instanciar el grafo de sus dytos
+				/*if (propertyDescriptionDto.isDyTO())
+				{
+					setDyTOPropertyAsNew(propertyName, propertyDescriptionDto as DyTOPropertyDescriptionDto, from);
+				}
+				else*/
 				if (propertyDescriptionDto.isDyTOList())
 				{
-					setNewDyTOListProperty(propertyName, DyTOListPropertyDescriptionDto(propertyDescriptionDto));
+					setDyTOListPropertyAsNew(propertyName, DyTOListPropertyDescriptionDto(propertyDescriptionDto));
 				}
-				else if (propertyDescriptionDto.isDyTO())
-				{
-					setDyTOPropertyWithNew(propertyName, propertyDescriptionDto);
-				}
+			}
+			
+			LOG.debug("End InstantiateChildren for -> "+ dyto);
+		}
+		
+		/**
+		 * Creates new DyTO and sets into the DyTO parent
+		 * @param propertyName
+		 * @param propertyDescription
+		 * @param from La historia de los dytos creados en el grafo para evitar cirularidad
+		 * 
+		 */		
+		private function setDyTOPropertyAsNew(propertyName:String, propertyDescription:DyTOPropertyDescriptionDto, from:Object): void
+		{
+			LOG.debug("Create DyTO for property -> "+propertyName);
+			
+			var fromDyTO:Object = from[propertyDescription.dytoType] 
+			
+			//To avoid circular instantiate
+			if (!fromDyTO)
+			{
+				from[description.dytoType] = dyto;
+				dyto[propertyName] = propertyDescription.createNew(from);
+			}
+			else
+			{
+				var dls:DyTOLifeSupport = DyTOs.getSupportFor(fromDyTO); 
 				
+				if (Log.isDebug())
+					LOG.debug("DyTO "+dls.query.reference+" already exist");
+				
+				dyto[propertyName] = dls.dyto
 			}
 		}
 		
 		/**
-		 * Sets DyTO child
-		 * @param propertyName
+		 * Create new DyTOList and sets into the DyTO parent 
+		 * @param propertyName 
 		 * @param propertyDescription
 		 * 
 		 */		
-		internal function setDyTOPropertyWithNew(propertyName: String, propertyDescription: PropertyDescriptionDto): void
-		{
-			LOG.debug("Create DyTO for property -> "+propertyName);
-			
-			dyto[propertyName] = propertyDescription.createNew();      
-		}
-		
-		internal function setNewDyTOListProperty(propertyName:String, propertyDescription:DyTOListPropertyDescriptionDto): void
+		private function setDyTOListPropertyAsNew(propertyName:String, propertyDescription:DyTOListPropertyDescriptionDto): void
 		{
 			LOG.debug("Create DyTOList for property -> "+propertyName);
 			// Ojo, esto no trata casos en que el backend modifique la colección
@@ -210,14 +247,9 @@ package org.dyto.dls
 			//if (!dyto.hasOwnProperty(propertyName) || dyto[propertyName])
 			//	return;
 			
-			//var dispatchWhenAsign:Boolean = false;
-			
 			var collectionQueryDto:QueryDto = QueryDto.createCollectionReference(query, propertyDescription.path);
 
 			var dytoList: DyTOList = new DyTOList(collectionQueryDto, propertyDescription);
-			
-			//if(state) 	
-			//	dytoList.doLoadPage(0, state[propertyName]);
 			
 			dyto[propertyName] = dytoList;
 		}

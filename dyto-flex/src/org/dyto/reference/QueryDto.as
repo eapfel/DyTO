@@ -47,7 +47,7 @@ package org.dyto.reference
 		 * @return new QueryDto
 		 * 
 		 */		
-		static public function createQueryReference(reference:ReferenceDto):QueryDto
+		static public function createReference(reference:ReferenceDto):QueryDto
 		{
 			var query:QueryDto = new QueryDto();
 			query.discriminator = REFERENCE_DISCRIMINATOR;
@@ -72,6 +72,11 @@ package org.dyto.reference
 			query.collectionReferencePathFromRoot = pathFromRoot;
 			
 			return query;
+		}
+		
+		public function toString():String
+		{
+			return reference ? reference.toString() : collectionReferenceRootReference.toString();
 		}
 	}
 }

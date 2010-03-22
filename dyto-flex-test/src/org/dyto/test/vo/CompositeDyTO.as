@@ -33,6 +33,9 @@ package org.dyto.test.vo
 		[DyTOProperty]
 		public var otherSimpleDyTO:SimpleDyTO;
 		
+		[DyTOProperty]
+		public var circularDyto:CircularSourceDyTO;
+		
 		[DyTOProperty(dyto="org.dyto.test.vo::SimpleDyTO")]
 		public var aDefaultDytoList:IList;
 		

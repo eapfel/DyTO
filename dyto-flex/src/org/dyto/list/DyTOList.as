@@ -19,6 +19,7 @@ package org.dyto.list
 	import flash.events.EventDispatcher;
 	import flash.utils.getQualifiedClassName;
 	
+	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.core.IPropertyChangeNotifier;
 	import mx.events.CollectionEvent;
@@ -27,20 +28,27 @@ package org.dyto.list
 	import mx.resources.IResourceManager;
 	import mx.resources.ResourceManager;
 	import mx.utils.ArrayUtil;
+	import mx.utils.UIDUtil;
 	
+	import org.dyto.DyTOs;
 	import org.dyto.description.DescriptionDto;
 	import org.dyto.description.DyTOListPropertyDescriptionDto;
 	import org.dyto.dls.DyTOLifeSupportBase;
 	import org.dyto.exception.DyTOError;
+	import org.dyto.namespaces.dyto;
 	import org.dyto.reference.QueryDto;
 	import org.dyto.reference.ResultConfigDto;
+	import org.dyto.uow.AddCommand;
+	import org.dyto.uow.RemoveCommand;
 	
+	use namespace dyto;
 	
 	/**
 	 * @author Ezequiel
 	 * @date Mar 15, 2010
 	 * @since 0.1	
 	 */
+	[Bindable]
 	public class DyTOList extends EventDispatcher implements IList, IPropertyChangeNotifier
 	{
 		//TODO: Falta toda la parte de carga de dyto
@@ -65,6 +73,12 @@ package org.dyto.list
 		private var _source:Array;
 
 		/**
+		 *  @private
+		 *  Storage for the UID String. 
+		 */
+		private var _uid:String;
+		
+		/**
 		 * 
 		 */		
 		private var _hasMoreElements:Boolean = false;
@@ -78,6 +92,11 @@ package org.dyto.list
 		 * 
 		 */		
 		private var _dls:DyTOLifeSupportBase;
+		
+		/**
+		 * 
+		 */		
+		private var _sourceQuery:QueryDto;
 		
 		/**
 		 * 
@@ -102,6 +121,8 @@ package org.dyto.list
 		{
 			super();
 			
+			_sourceQuery = query;
+			
 			_dls = new DyTOLifeSupportBase(propertyDescription.descriptionDto, query);
 			_dls.dyto = this;
 			
@@ -112,6 +133,8 @@ package org.dyto.list
 			_elementDescriptionDto = propertyDescription.descriptionDto;
 			
 			_source = [];
+			
+			_uid = UIDUtil.createUID();
 			
 		}
 		
@@ -178,11 +201,12 @@ package org.dyto.list
 				var len:int = length;
 				for (var i:int = 0; i < len; i++)
 				{
-					//stopTrackUpdates(source[i]);
-					internalRemoveItemAt(i)
+					createRemoveCommand(_source[i]);
+					
+					stopTrackUpdates(_source[i]);
 				}
 				
-				//_source.splice(0, length);
+				_source.splice(0, length);
 				
 				internalDispatchEvent(CollectionEventKind.RESET);
 			}
@@ -197,7 +221,11 @@ package org.dyto.list
 				throw new RangeError(message);
 			}
 			
-			var removed:Object = internalRemoveItemAt(index);
+			var removed:Object = _source.splice(index, 1)[0];
+			
+			createRemoveCommand(removed);
+			
+			stopTrackUpdates(removed);
 			
 			internalDispatchEvent(CollectionEventKind.REMOVE, removed, index);
 
@@ -216,11 +244,12 @@ package org.dyto.list
 		
 		public function get uid():String
 		{
-			return null;
+			return _uid;
 		}
 		
 		public function set uid(value:String):void
 		{
+			_uid = value;
 		}
 		
 		/**
@@ -229,22 +258,79 @@ package org.dyto.list
 		override public function toString():String
 		{
 			if (_source)
-				return _source.toString();
+				return getQualifiedClassName(this)+" " +_source.toString();
 			else
 				return getQualifiedClassName(this); 
 		}   
 		
 		//--------------------------------------------------------------
 		//
+		// Protected Methods
+		//
+		//--------------------------------------------------------------
+		
+		/**
+		 *  Called whenever any of the contained items in the list fire an
+		 *  ObjectChange event.  
+		 *  Wraps it in a CollectionEventKind.UPDATE.
+		 */    
+		protected function itemUpdateHandler(event:PropertyChangeEvent):void
+		{
+			internalDispatchEvent(CollectionEventKind.UPDATE, event);
+			// need to dispatch object event now
+			if (_dispatchEvents == 0 && hasEventListener(PropertyChangeEvent.PROPERTY_CHANGE))
+			{
+				var objEvent:PropertyChangeEvent = PropertyChangeEvent(event.clone());
+				var index:uint = getItemIndex(event.target);
+				objEvent.property = index.toString() + "." + event.property;
+				dispatchEvent(objEvent);
+			}
+		}
+		
+		/** 
+		 *  If the item is an IEventDispatcher watch it for updates.  
+		 *  This is called by addItemAt and when the source is initially
+		 *  assigned.
+		 */
+		protected function startTrackUpdates(item:Object):void
+		{
+			if (item && (item is IEventDispatcher))
+			{
+				IEventDispatcher(item).addEventListener(
+					PropertyChangeEvent.PROPERTY_CHANGE, 
+					itemUpdateHandler, false, 0, true);
+			}
+		}
+		
+		/** 
+		 *  If the item is an IEventDispatcher stop watching it for updates.
+		 *  This is called by removeItemAt, removeAll, and before a new
+		 *  source is assigned.
+		 */
+		protected function stopTrackUpdates(item:Object):void
+		{
+			if (item && item is IEventDispatcher)
+			{
+				IEventDispatcher(item).removeEventListener(
+					PropertyChangeEvent.PROPERTY_CHANGE, 
+					itemUpdateHandler);    
+			}
+		}
+		
+		
+		//--------------------------------------------------------------
+		//
 		// Private Methods
 		//
 		//--------------------------------------------------------------
+		
 		private function doAddPending():void
 		{
 			var initialPosition: int = _source.length;
 			var added: Array = [];
 			var toAddWhenLoadedLength:int = _toAddWhenLoaded.length
 			var item:Object;
+			var itemDls:DyTOLifeSupportBase;
 			
 			for(var i:int = 0; i < toAddWhenLoadedLength; i++)
 			{
@@ -252,10 +338,11 @@ package org.dyto.list
 				_source.push(item);
 				
 				//TODO:  Agregar esto
-				//var itemSupport: DyTOLifeSupportBase = DyTOs.getSupportFor(item);
-				//support.log(AddCommandDto.create(sourceQuery, itemSupport.query));
+				itemDls = DyTOs.getSupportFor(item);
+				_dls.log(AddCommand.create(_sourceQuery, itemDls.query));
 				//
 				
+				startTrackUpdates(item);
 				internalDispatchEvent(CollectionEventKind.ADD, item, i);
 			}
 			           
@@ -299,18 +386,53 @@ package org.dyto.list
 			}
 		}
 		
-		//TODO:Agregar RemoveCommand
-		private function internalRemoveItemAt(index:int):Object 
+		/**
+		 * Create Remove Command
+		 * @private 
+		 */		
+		private function createRemoveCommand(removed:Object):Object 
 		{
-			var removed:Object = _source.splice(index, 1)[0];
+			var itemDls:DyTOLifeSupportBase = DyTOs.getSupportFor(removed);
 			
-			//TODO: Agregar removeCommand
-			//stopTrackUpdates(removed);
-			//var itemSupport: DyTOLifeSupportBase = DyTOs.getSupportFor(item);
-			//support.log(RemoveCommandDto.create(sourceQuery, itemSupport.query, index));
-			//
+			_dls.log(RemoveCommand.create(_sourceQuery, itemDls.query));
 			
 			return removed;
+		}
+		
+		/**
+		 * Gets consolidated command logs
+		 * only used on DyTO framework
+		 *  
+		 * @param alreadyVisited
+		 * @return an array of commandlogs 
+		 * 
+		 */		
+		dyto function consolidateCommandLogs(alreadyVisited:Object):Array
+		{
+			
+			var commands:Array = _dls.consolidateCommandLogs(alreadyVisited).toArray();
+			
+			var item:Object, reference:String, childCommandLog:ArrayCollection;
+			
+			var len:int = _source.length;
+			
+			for (var i:int = 0; i < len; i++)
+			{
+				item = _source[i];
+					
+				reference = DyTOs.getReferenceFor(item).toString();
+				
+				if(!alreadyVisited.hasOwnProperty(reference))
+				{
+					alreadyVisited[reference] = true;
+					
+					childCommandLog = DyTOs.getSupportFor(item).consolidateCommandLogs(alreadyVisited)
+					
+					commands = commands.concat(childCommandLog.toArray());
+				}	
+			}
+
+			return commands;
 		}
 	}
 }

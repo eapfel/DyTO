@@ -81,7 +81,7 @@ package org.dyto.description.factory.impl
 			// check for this type in Dictionary and return it if already exists
 			if (!descriptionDto)
 			{
-				LOG.debug("DescriptionDto doesn't exist for class -> "+dytoClass+". Call buildDescriptionFor");
+				LOG.debug("Miss DescriptionDto doesn't exist for class -> "+dytoClass+". Call buildDescriptionFor");
 				
 				descriptionCache[dytoClass] = null;
 				

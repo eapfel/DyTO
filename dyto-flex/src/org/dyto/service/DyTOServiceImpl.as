@@ -16,49 +16,13 @@
 
 package org.dyto.service
 {
-	import flash.utils.getQualifiedClassName;
-	
-	import mx.logging.ILogger;
-	import mx.logging.Log;
-	
-	import org.dyto.description.DescriptionDto;
-	import org.dyto.description.factory.DescriptionFactory;
-	import org.dyto.description.factory.impl.DescriptionFactoryImpl;
-	import org.dyto.dls.DyTOLifeSupport;
-	import org.dyto.exception.DyTOError;
-	import org.dyto.reference.ReferenceDto;
-	
 	/**
 	 * @author Ezequiel
 	 * @date Mar 14, 2010
-	 * @since 	
+	 * @since 0.1 	
 	 */
 	public class DyTOServiceImpl
 	{
-		/**
-		 * LOG 
-		 */		
-		static private const LOG:ILogger = Log.getLogger("org.dyto.service.DyTOServiceImpl");
 		
-		/**
-		 * Description factory 
-		 */		
-		static private var descriptionFactory:DescriptionFactory = new DescriptionFactoryImpl();
-		
-		/**
-		 * Creates a new transient dyto 
-		 * @return new Dyto
-		 */		
-		static public function createNew(dytoType:Class):Object
-		{
-			var description:DescriptionDto = descriptionFactory.descriptionFor(dytoType);
-			
-			if (!description)
-				throw new DyTOError("DyTOClass "+getQualifiedClassName(dytoType)+" not mapped, verify if DyTOClass(alias=\"package.yourremoteclass\") metadata is setted");
-			
-			var reference:ReferenceDto = ReferenceDto.createNewTransientReference(description.remoteClassName);
-			
-			return DyTOLifeSupport.createTransientDyTO(description,reference);
-		}
 	}
 }

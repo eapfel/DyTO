@@ -22,6 +22,8 @@ package org.dyto.description
 	import mx.logging.Log;
 	
 	import org.dyto.dls.DyTOLifeSupport;
+	import org.dyto.reference.QueryDto;
+	import org.dyto.uow.UpdateCommand;
 	
 	/**
 	 * Contains the remote class' properties
@@ -53,6 +55,11 @@ package org.dyto.description
 		 */		
 		public var properties:Object = {};
 		
+		//--------------------------------------------------------------
+		//
+		// Public Methods
+		//
+		//--------------------------------------------------------------
 		
 		/**
 		 * Bind properties 
@@ -75,6 +82,7 @@ package org.dyto.description
 				{
 					propertyDescription = properties[propertyName]
 					
+					//TODO: Revisar si hace falta crear un listener para una dytoList	
 					if (!propertyDescription.isDyTOList())
 					{
 						propertyListeners[propertyName] = propertyDescription.bind(propertyName, dls);;
@@ -88,5 +96,37 @@ package org.dyto.description
 			
 			return propertyListeners;
 		}
+		
+		/**
+		 * Create a new Command
+		 *  
+		 * @param query
+		 * @param propertyName
+		 * @param oldValue
+		 * @param newValue
+		 */		
+		public function createUpdateCommand(query:QueryDto, propertyName:String, oldValue:Object, newValue:Object):UpdateCommand
+		{
+			return propertyDescriptionFor(propertyName).createUpdateCommand(query, oldValue, newValue);
+		}
+		
+		
+		//--------------------------------------------------------------
+		//
+		// Private Methods
+		//
+		//--------------------------------------------------------------
+		
+		/**
+		 * Get propertyDescriptionDto from name
+		 *  
+		 * @param propertyName
+		 * @return 
+		 */		
+		private function propertyDescriptionFor(propertyName:String):PropertyDescriptionDto
+		{
+			return properties[propertyName];
+		}
+		
 	}
 }

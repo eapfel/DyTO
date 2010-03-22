@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testrun name="" >
 <testsuite  name="Default Test Suite" project="dyto-flex-test">
+<testsuite name="org.dyto.test.description:DescriptionFactoryTest" type="testcaseclass">
+<testcase name="testIfClassNameIsCorrect" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+<testcase name="testIfNumberOfPropertiesIsCorrect" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+<testcase name="testIfNumberOfPropertiesIsCorrectInGeneralizationClass" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+<testcase name="testIfCompositeDyTOPropertiesIsOk" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+<testcase name="testIfCompositeDyTOListPropertiesIsOk" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+<testcase name="testIfTreeDyTOisOk" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+<testcase name="testIfCircularDyTOWorksOk" classname="org.dyto.test.description:DescriptionFactoryTest"/>
+</testsuite>
 <testsuite name="org.dyto.test.dyto:DyTOsTest" type="testcaseclass">
 <testcase name="testIfCreateNewWorksOk" classname="org.dyto.test.dyto:DyTOsTest"/>
 <testcase name="testIfCommandLogsWorksOk" classname="org.dyto.test.dyto:DyTOsTest"/>
+<testcase name="testIfCommandLogs3CircularWorksOk" classname="org.dyto.test.dyto:DyTOsTest"/>
 </testsuite>
 </testsuite>
 </testrun>

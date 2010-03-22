@@ -4,16 +4,24 @@
 							 xmlns:mx="library://ns.adobe.com/flex/halo" minWidth="1024" minHeight="768" xmlns:flexunit="flexunit.flexui.*"    creationComplete="onCreationComplete()" >	
 <fx:Script>
 	<![CDATA[
-		import mx.logging.LogEventLevel;
-		
-		import org.dyto.test.dyto.DyTOsTest;
+
 		import org.flexunit.runner.Request;
+		import org.dyto.test.description.DescriptionFactoryTest;
+		import org.dyto.test.dyto.DyTOsTest;
 
 		public function currentRunTestSuite():Array
 		{
 			var testsToRun:Array = new Array();
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfClassNameIsCorrect"));
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfNumberOfPropertiesIsCorrect"));
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfNumberOfPropertiesIsCorrectInGeneralizationClass"));
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfCompositeDyTOPropertiesIsOk"));
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfCompositeDyTOListPropertiesIsOk"));
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfTreeDyTOisOk"));
+			testsToRun.push(Request.method( org.dyto.test.description.DescriptionFactoryTest,"testIfCircularDyTOWorksOk"));
 			testsToRun.push(Request.method( org.dyto.test.dyto.DyTOsTest,"testIfCreateNewWorksOk"));
 			testsToRun.push(Request.method( org.dyto.test.dyto.DyTOsTest,"testIfCommandLogsWorksOk"));
+			testsToRun.push(Request.method( org.dyto.test.dyto.DyTOsTest,"testIfCommandLogs3CircularWorksOk"));
 			return testsToRun;
 		}
 		private function onCreationComplete():void
@@ -22,19 +30,5 @@
 		}
 ]]>
 </fx:Script>
-
-	<fx:Declarations>
-		<s:TraceTarget 
-			level="{LogEventLevel.DEBUG}" 
-			includeDate="true" includeTime="true" 
-			includeCategory="true" includeLevel="true">
-			<s:filters>
-				<fx:Array>
-					<fx:String>org.*</fx:String>
-				</fx:Array>
-			</s:filters>
-		</s:TraceTarget>
-	</fx:Declarations>
-	
 <flexunit:FlexUnitTestRunnerUI id="testRunner"/>
 </s:Application>

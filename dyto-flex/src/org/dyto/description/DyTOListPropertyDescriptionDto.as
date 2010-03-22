@@ -40,7 +40,7 @@ package org.dyto.description
 		/**
 		 * @inheritDoc 
 		 */
-		override public function createNew():Object
+		override public function createNew(from:Object):Object
 		{
 			return null;
 		}

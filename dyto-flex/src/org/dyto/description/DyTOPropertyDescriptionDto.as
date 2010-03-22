@@ -16,7 +16,14 @@
 
 package org.dyto.description
 {
-	import org.dyto.service.DyTOServiceImpl;
+	import org.dyto.DyTOs;
+	import org.dyto.description.factory.impl.DyTOFactory;
+	import org.dyto.reference.QueryDto;
+	import org.dyto.uow.UpdateCommand;
+	import org.dyto.uow.UpdateDyTOCommand;
+	import org.dyto.namespaces.dyto;
+	
+	use namespace dyto;
 	
 	/**
 	 * @author Ezequiel
@@ -44,9 +51,9 @@ package org.dyto.description
 		/**
 		 * @inheritDoc 
 		 */
-		override public function createNew():Object
+		override public function createNew(from:Object):Object
 		{
-			return DyTOServiceImpl.createNew(dytoType);
+			return DyTOFactory.innerCreateNew(dytoType, from);
 		}
 		
 		/**
@@ -63,6 +70,21 @@ package org.dyto.description
 		override public function isDyTOList():Boolean
 		{
 			return false;
+		}
+		
+		override public function createUpdateCommand(query:QueryDto, oldValue:Object, newValue:Object):UpdateCommand
+		{
+			var cmd:UpdateDyTOCommand = super.createUpdateCommand(query, oldValue, newValue) as UpdateDyTOCommand;
+			
+			if(newValue != null)
+				cmd.valueQuery = QueryDto.createReference(DyTOs.getReferenceFor(newValue));
+			
+			return cmd;
+		}
+		
+		override protected function innerCreateUpdateCommand():UpdateCommand
+		{
+			return new UpdateDyTOCommand();
 		}
 	}
 }

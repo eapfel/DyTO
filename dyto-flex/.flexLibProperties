@@ -22,6 +22,12 @@
     <classEntry path="org.dyto.listener.PropertyListener"/>
     <classEntry path="org.dyto.list.DyTOList"/>
     <classEntry path="org.dyto.reference.ResultConfigDto"/>
+    <classEntry path="org.dyto.uow.CommandDto"/>
+    <classEntry path="org.dyto.uow.UpdateCommand"/>
+    <classEntry path="org.dyto.uow.UpdateDyTOCommand"/>
+    <classEntry path="org.dyto.description.factory.impl.DyTOFactory"/>
+    <classEntry path="org.dyto.uow.AddCommand"/>
+    <classEntry path="org.dyto.uow.RemoveCommand"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
